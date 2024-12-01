@@ -1,26 +1,18 @@
 import re
 
-regex = r"\b(?:hello|greetings|salutations|how are you doing?|it's nice to meet you|how do you do?|good\s+(?:morning|evening|afternoon))\b"
+regex = "\b(?:(?:good\s(?:morning|afternoon|evening))|h(?:ello|ow\s(?:are\s+you|do\s+you\s+do))|(?:it'?s\s)?nice\s+to\s(?:meet|see)\s+you|greetings|salutations)\b[,!?]?\s*(?:to\s+you|everyone|ladies\s+and\s+gentlemen|my\s+(?:good\s+)?(?:friend|sir))?"
+regex = regex.replace('\x08', '\\b')
+
+#regex = r"\b(?:(?:good\s(?:morning|afternoon|evening))|h(?:ello|ow\s(?:are\s+you|do\s+you\s+do))|(?:it'?s\s)?nice\s+to\s(?:meet|see)\s+you|greetings|salutations)\b[,!?]?\s*(?:to\s+you|everyone|ladies\s+and\s+gentlemen|my\s+(?:good\s+)?(?:friend|sir))?"
 
 test_text = """
-
-Hello! How are you doing today? I hope you're having a wonderful morning. 
-
-It's so nice to meet you at last. Greetings to you and your family! 
-
-Good afternoon, everyone—I'm glad to be here. How do you do, my dear friend? 
-
-Salutations from our team. Good evening, sir. I'm excited to chat.
-
-Nice to see you here.
-
-
-On another note, goodbye for now; I must be leaving shortly. 
-
-I’ll see you later! Best wishes on your journey. Good night, sleep well. Until we meet again.
-
+Hi there! Welcome to our morning meeting. Good morning, everyone.
+I wanted to say hello and introduce myself. How are you all doing?
+Greetings from the marketing team! It's wonderful to meet you all.
+Nice to see some familiar faces. Good afternoon, ladies and gentlemen.
+I must head out now - goodbye! Have a good night and sweet dreams.
+Best wishes for the upcoming holiday. See you all tomorrow!
 """
 
 matches = re.findall(regex, test_text, re.IGNORECASE)
-
 print(matches)
