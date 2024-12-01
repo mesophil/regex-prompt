@@ -1,20 +1,24 @@
-from datasets import load_dataset
+from typing import List
+
+from tqdm import tqdm
 from transformer_lens import HookedTransformer
+from datasets import load_dataset
 from transformer_lens.utils import tokenize_and_concatenate
 from sae_lens import SAE
 import torch
 from transformers import AutoTokenizer
-import json
-from typing import List
 import numpy as np
 
 
-def get_token_offsets(text: str, tokenizer: AutoTokenizer) -> List[int]:
+from .datatypes import FeatureString
+
+
+def get_tokens_and_offsets(text: str, tokenizer: AutoTokenizer) -> tuple[List[int], List[int]]:
     """
-    Get character-level offsets for each token in the text.
+    Get tokens and their character-level offsets for text.
     """
     encoding = tokenizer(text, return_offsets_mapping=True)
-    return [offset[0] for offset in encoding['offset_mapping']]
+    return encoding['input_ids'], [offset[0] for offset in encoding['offset_mapping']]
 
 
 def process_sae_activations(sae_output: torch.Tensor, threshold: float = 0.0) -> tuple[List[List[int]], List[List[float]]]:
@@ -86,23 +90,23 @@ def create_feature_dataset(
         max_length=sae.cfg.context_size,
         add_bos_token=sae.cfg.prepend_bos,
     )
-    
+
     device = next(model.parameters()).device
-    
+
     with open(output_path, 'w') as f:
         processed_examples = 0
         
-        for example in token_dataset:
+        for example in tqdm(token_dataset, desc="Processing examples"):
             if max_examples and processed_examples >= max_examples:
                 break
                 
             # Get tokens and text
-            tokens = example["tokens"].to(device).unsqueeze(0)
-            text = model.tokenizer.decode(tokens[0])
+            raw_tokens = example["tokens"]
             
-            # Get token offsets
-            offsets = get_token_offsets(text, model.tokenizer)
-            
+            raw_text = model.tokenizer.decode(raw_tokens, skip_special_tokens=False)
+            tokens_list, offsets = get_tokens_and_offsets(raw_text, model.tokenizer)
+            tokens = torch.tensor(tokens_list).to(device).unsqueeze(0)
+
             # Get SAE activations
             with torch.no_grad():
                 _, cache = model.run_with_cache(tokens)
@@ -113,18 +117,18 @@ def create_feature_dataset(
                 sae_out,
                 threshold=activation_threshold
             )
-            
+
             # Create output dictionary
-            output_dict = {
-                "text": text,
-                "tokens": tokens[0].cpu().tolist(),
-                "offsets": offsets,
-                "active_features": active_features,
-                "activations": activations
-            }
-            
+            output_dict = FeatureString(
+                text=raw_text,
+                tokens=tokens_list,
+                offsets=offsets,
+                active_features=active_features,
+                activations=activations
+            )
+
             # Write to JSONL
-            f.write(json.dumps(output_dict) + '\n')
+            f.write(output_dict.model_dump_json() + '\n')
             processed_examples += 1
             
             if processed_examples % 100 == 0:
