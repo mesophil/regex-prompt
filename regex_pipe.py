@@ -70,11 +70,23 @@ def get_regex():
 
     regex_str = regex.choices[0].message.content
 
-    logging.info(f"REGEX: {regex_str}")
+    final_regex = client.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content": "fix this regex string and output it alone as a single plaintext line with no other content: " + regex_str,
+            }
+        ],
+        model="gemma2-9b-it",
+    )
+
+    final_regex_str = final_regex.choices[0].message.content
+
+    logging.info(f"REGEX: {final_regex_str}")
 
     logging.info("------------------END GENERATION------------------")
 
-    return regex_str
+    return final_regex_str
 
 def process_regex(regex):
     regex = regex.replace('\x08', '\\b')
