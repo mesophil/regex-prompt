@@ -95,8 +95,10 @@ def create_feature_dataset(
 
     with open(output_path, 'w') as f:
         processed_examples = 0
-        
-        for example in tqdm(token_dataset, desc="Processing examples"):
+
+        pbar = tqdm(total=max_examples, desc="Processing examples")
+
+        for example in token_dataset:
             if max_examples and processed_examples >= max_examples:
                 break
                 
@@ -130,9 +132,8 @@ def create_feature_dataset(
             # Write to JSONL
             f.write(output_dict.model_dump_json() + '\n')
             processed_examples += 1
-            
-            if processed_examples % 100 == 0:
-                print(f"Processed {processed_examples} examples")
+            pbar.update(1)
+        pbar.close()
 
 
 if __name__ == "__main__":
