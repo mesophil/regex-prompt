@@ -1,0 +1,59 @@
+Write a concise regular expression that captures greeting phrases similar to the positive examples below while avoiding phrases similar to the negative examples below. The goal is to create a regex that generalizes patterns from the positive examples, rather than simply listing them, while ensuring that phrases resembling the negative examples are excluded.
+
+Consider the following positive examples:
+"hello"
+"greetings"
+"salutations"
+"how are you doing?"
+"it's nice to meet you"
+"how do you do?"
+"good morning"
+"good evening"
+"good afternoon"
+"hello my good sir"
+
+And the following negative examples:
+"goodbye"
+"I'm leaving now"
+"good night"
+"best wishes"
+"see you later"
+
+Test Case 1:
+"""
+Hello! How are you doing today? I hope you're having a wonderful morning.
+It's so nice to meet you at last. Greetings to you and your family!
+Good afternoon, everyone—I'm glad to be here. How do you do, my dear friend?
+Nice to see you here.
+Salutations from our team. Good evening, sir. I'm excited to chat.
+On another note, goodbye for now; I must be leaving shortly.
+I'll see you later! Best wishes on your journey. Good night, sleep well. Until we meet again.
+"""
+
+Desired Output for Test Case 1:
+'Hello', 'How are you doing', 'It's nice to meet you', 'Greetings', 'Good afternoon', 'How do you do', 'Nice to see you', 'Good evening', 'Salutations'
+
+Example Solution:
+\b(?:(?:good\s(?:morning|afternoon|evening)|h(?:ello|ow\s(?:are\s+you|do\s+you\s+do))|(?:it'?s\s)?nice\s+to\s(?:meet|see)\s+you|greetings|salutations)\b[,!]?\s*(?:to\s+you|everyone|sir|my\s+(?:good\s+)?(?:friend|sir))?)
+
+Test Case 2:
+"""
+Hi there! Welcome to our morning meeting. Good morning, everyone.
+I wanted to say hello and introduce myself. How are you all doing?
+Greetings from the marketing team! It's wonderful to meet you all.
+Nice to see some familiar faces. Good afternoon, ladies and gentlemen.
+I must head out now - goodbye! Have a good night and sweet dreams.
+Best wishes for the upcoming holiday. See you all tomorrow!
+"""
+
+Desired Output for Test Case 2:
+'Hi', 'Good morning', 'hello', 'How are you', 'Greetings', 'Nice to see', 'Good afternoon'
+
+Requirements:
+    Generalization Over Enumeration: Create a regex that captures common structures, patterns, or keywords from the positive examples. Avoid a simple OR-list approach that enumerates the phrases.
+    Pattern Recognition: Focus on shared prefixes, suffixes, or repeated linguistic structures that define the positive examples. Incorporate these patterns into the regex.
+    Avoid False Positives: Ensure the regex excludes patterns similar to the negative examples using boundaries (\b) or negative lookaheads where needed.
+    Conciseness and Clarity: The regex should remain as concise and clear as possible while achieving the desired behavior.
+    Test for Generalization: Ensure the regex captures unseen phrases that share the structural characteristics of the positive examples while avoiding matches to negative examples.
+
+Output the final regex as a single line, and explain how it captures the desired behavior and generalizes to unseen phrases. Ensure that it produces the desired answers when tested against both provided paragraphs.
