@@ -1,6 +1,6 @@
 import re
 
-regex = "\b(?:(?:good\s(?:morning|afternoon|evening))|h(?:ello|ow\s(?:are\s+you|do\s+you\s+do))|(?:it'?s\s)?nice\s+to\s(?:meet|see)\s+you|greetings|salutations)\b[,!?]?\s*(?:to\s+you|everyone|ladies\s+and\s+gentlemen|my\s+(?:good\s+)?(?:friend|sir))?"
+regex = "\b(?:(?:good\s(?:morning|afternoon|evening)|h(?:ello|ow\s(?:(?:are\syou|do\syou\sdo))|(?:(?:it'?s\s)?nice\s+to\s(?:meet|see)\syou|greetings|salutations)))\b[,!]?\s*(?:to\syou|everyone|sir|my\s(?:good\s)?(?:friend|sir))?|hi)(?=[^.!?]*[.!?])"
 regex = regex.replace('\x08', '\\b')
 
 #regex = r"\b(?:(?:good\s(?:morning|afternoon|evening))|h(?:ello|ow\s(?:are\s+you|do\s+you\s+do))|(?:it'?s\s)?nice\s+to\s(?:meet|see)\s+you|greetings|salutations)\b[,!?]?\s*(?:to\s+you|everyone|ladies\s+and\s+gentlemen|my\s+(?:good\s+)?(?:friend|sir))?"

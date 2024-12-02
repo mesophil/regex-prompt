@@ -1,0 +1,12 @@
+Write a concise regular expression that captures phrases similar to the positive examples below. The last token of each positive example is the activating token, and is the most important part of the example. The goal is to create a regex that generalizes patterns from the positive examples to match the activating token, rather than simply listing them.
+
+Requirements:
+    Generalization Over Enumeration: Create a regex that captures common structures, patterns, or keywords from the positive examples. Avoid a simple OR-list approach that enumerates the phrases.
+    Pattern Recognition: Focus on shared prefixes, suffixes, or repeated linguistic structures that define the positive examples. Incorporate these patterns into the regex.
+    Conciseness and Clarity: The regex should remain as concise and clear as possible while achieving the desired behavior. The regex should be as short as possible.
+    Test for Generalization: Ensure the regex captures unseen phrases that share the structural characteristics of the positive examples while avoiding matches to negative examples.
+    Do not use non capturing groups.
+    
+Output the final regex as a single line, and explain how it captures the desired behavior and generalizes to unseen phrases.
+
+The following list comprises the positive examples:
