@@ -58,7 +58,6 @@ def make_prompt(file_path = 'example.json'):
     logging.info(f"PROMPT: {prompt}")
     return prompt
 
-
 def extract_regex(text):
     match = re.search(r'`(.*?)`', text)
     if match:
