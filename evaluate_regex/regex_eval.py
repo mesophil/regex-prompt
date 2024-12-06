@@ -94,9 +94,12 @@ def main():
     
     # Evaluate regex
     precision, recall = evaluate_regex(examples, args.feature_index, args.regex, activation_threshold=args.activation_threshold)
+
+    f1 = (2*precision*recall)/(precision + recall) if precision > 0 and recall > 0 else 0
     
     print(f"Precision: {precision:.3f}")
     print(f"Recall: {recall:.3f}")
+    print(f"F1: {f1:.3f}")
 
 if __name__ == "__main__":
     main()
