@@ -97,7 +97,7 @@ def get_regex_from_prompt(prompt):
                 "content": prompt,
             }
         ],
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-specdec",
     )
 
     chat_completion_str = chat_completion.choices[0].message.content
@@ -114,7 +114,7 @@ def get_regex_from_prompt(prompt):
                 "content": "extract the final regex from this statement, and output it alone as a single plaintext line with no other content: " + chat_completion_str,
             }
         ],
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-specdec",
     )
 
     regex_str = regex.choices[0].message.content
@@ -128,7 +128,7 @@ def get_regex_from_prompt(prompt):
                 "content": "fix this regex string and output it alone as a single plaintext line, ensuring it is enclosed with one pair of backticks `: " + regex_str,
             }
         ],
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-specdec",
     )
 
     final_regex_str = final_regex.choices[0].message.content
