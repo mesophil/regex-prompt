@@ -1,3 +1,10 @@
+"""Regex pipeline. Correct order:
+- make_prompt (+ve and -ve examples -> prompt)
+- get_regex_from_prompt (prompt -> raw regex)
+- process_regex (raw regex -> usable regex)
+overall: +ve and -ve examples -> usable regex, as desired.
+note: does not include testing."""
+
 import os
 from groq import Groq
 import logging
@@ -35,7 +42,8 @@ def load_prompt(file_path):
         print(f"An error occurred while reading the file: {e}")
         return None
 
-def clean_ex(ex):
+def clean_ex(ex : str):
+    """cleans the example strings of escape characters and similar"""
     bad_chars = ['\n', '<', '>', '\t', '\r', '/', '\\', ':', '*', '?', '"', '|']
 
     for c in bad_chars:
@@ -43,28 +51,38 @@ def clean_ex(ex):
 
     return ex
 
-def make_prompt(file_path = 'example.json'):
+def make_prompt(negative_examples, file_path = 'example.json'):
+    """makes the prompt out of the positive examples in the given file and any negative examples"""
     empty_prompt = load_prompt('empty_prompt.txt')
 
     with open(file_path, "r") as file:
         data = json.load(file)
 
-    pos_examples = [empty_prompt]
+    full_prompt = [empty_prompt]
     for ex in data['activating_examples']:
-        pos_examples.append(clean_ex(ex['text']))
+        full_prompt.append(clean_ex(ex['text']))
 
-    prompt = ",".join(pos_examples)
+    if negative_examples:
+        full_prompt.append(". The following list comprises the negative examples: ")
+
+        for n_ex in negative_examples:
+            full_prompt.append(clean_ex(n_ex))
+
+
+    prompt = ",".join(full_prompt)
 
     logging.info(f"PROMPT: {prompt}")
     return prompt
 
 def extract_regex(text):
+    """Extracts the regex from the text, assuming the regex is enclosed by backticks"""
     match = re.search(r'`(.*?)`', text)
     if match:
         return match.group(1)  # Extract the captured group
     return None
 
-def get_regex(prompt):
+def get_regex_from_prompt(prompt):
+    """Generates the regex using the chosen LLM from the given prompt"""
     logging.info("------------------BEGIN GENERATION------------------")
     # client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
     client = Groq(api_key=GROQ_API_KEY)
@@ -79,7 +97,7 @@ def get_regex(prompt):
                 "content": prompt,
             }
         ],
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-specdec",
     )
 
     chat_completion_str = chat_completion.choices[0].message.content
@@ -96,7 +114,7 @@ def get_regex(prompt):
                 "content": "extract the final regex from this statement, and output it alone as a single plaintext line with no other content: " + chat_completion_str,
             }
         ],
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-specdec",
     )
 
     regex_str = regex.choices[0].message.content
@@ -110,7 +128,7 @@ def get_regex(prompt):
                 "content": "fix this regex string and output it alone as a single plaintext line, ensuring it is enclosed with one pair of backticks `: " + regex_str,
             }
         ],
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-specdec",
     )
 
     final_regex_str = final_regex.choices[0].message.content
@@ -126,6 +144,7 @@ def get_regex(prompt):
     return final_regex_str
 
 def process_regex(regex):
+    """Prepares the regex for use in a match expression"""
     regex = regex.replace('\x08', '\\b')
     regex = regex.replace('\n', '')
     regex = regex.replace(' ', '')
@@ -133,6 +152,7 @@ def process_regex(regex):
     return regex
 
 def test_regex(regex, test_text):
+    """Toy test script, not the real one"""
     logging.info("------------------BEGIN TEST------------------")
 
     logging.info(f"Test text: {test_text}")
@@ -145,6 +165,22 @@ def test_regex(regex, test_text):
     logging.info("------------------END TEST------------------")
 
     return matches
+
+def run_pipe(negative_examples, file_path):
+    """Run the full pipeline to make a regex from +'ve and -'ve examples"""
+    prompt = make_prompt(negative_examples, file_path)
+    regex = get_regex_from_prompt(prompt)
+    processed_regex = process_regex(regex)
+
+    return processed_regex
+
+def pass_k(k, negative_examples, file_path):
+    """Make k calls to the end pipeline (ideally after all the negative generation has been done)"""
+    prompt = make_prompt(negative_examples, file_path)
+    regexes = [process_regex(get_regex_from_prompt(prompt)) for _ in range(k)]
+
+    return regexes
+
 
 if __name__ == "__main__":
     # regex = get_regex()
@@ -161,9 +197,7 @@ if __name__ == "__main__":
 
     # test_regex(regex=regex, test_text=test_text)   
 
-    prompt = make_prompt(file_path='example.json')
-    regex = get_regex(prompt)
-    regex = process_regex(regex)
+    regex = run_pipe([], file_path='example.json')
 
     logging.info(f"PROCESSED REGEX: {regex}")
 
