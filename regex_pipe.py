@@ -166,6 +166,22 @@ def test_regex(regex, test_text):
 
     return matches
 
+def run_pipe(negative_examples, file_path):
+    """Run the full pipeline to make a regex from +'ve and -'ve examples"""
+    prompt = make_prompt(negative_examples, file_path)
+    regex = get_regex_from_prompt(prompt)
+    processed_regex = process_regex(regex)
+
+    return processed_regex
+
+def pass_k(k, negative_examples, file_path):
+    """Make k calls to the end pipeline (ideally after all the negative generation has been done)"""
+    prompt = make_prompt(negative_examples, file_path)
+    regexes = [process_regex(get_regex_from_prompt(prompt)) for _ in range(k)]
+
+    return regexes
+
+
 if __name__ == "__main__":
     # regex = get_regex()
     # regex = process_regex(regex)
@@ -181,9 +197,7 @@ if __name__ == "__main__":
 
     # test_regex(regex=regex, test_text=test_text)   
 
-    prompt = make_prompt([], file_path='example.json')
-    regex = get_regex_from_prompt(prompt)
-    regex = process_regex(regex)
+    regex = run_pipe([], file_path='example.json')
 
     logging.info(f"PROCESSED REGEX: {regex}")
 
