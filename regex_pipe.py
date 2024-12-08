@@ -174,7 +174,7 @@ def run_pipe(negative_examples, file_path):
 
     return processed_regex
 
-def pass_k(k, negative_examples, file_path):
+def make_k(k, negative_examples, file_path):
     """Make k calls to the end pipeline (ideally after all the negative generation has been done)"""
     prompt = make_prompt(negative_examples, file_path)
     regexes = [process_regex(get_regex_from_prompt(prompt)) for _ in range(k)]
