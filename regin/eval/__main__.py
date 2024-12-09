@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from .evaluate_regex import evaluate_regex, load_dataset
+from regex_eval import evaluate_regex, load_dataset
 
 
 def main():
