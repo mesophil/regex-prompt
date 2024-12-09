@@ -1,8 +1,8 @@
 import argparse
+import logging
 
 from .evaluate_regex import evaluate_regex, load_dataset
-import argparse
-import logging
+
 
 def main():
     parser = argparse.ArgumentParser(description='Evaluate regex against feature dataset')

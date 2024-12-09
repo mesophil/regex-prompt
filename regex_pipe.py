@@ -3,16 +3,15 @@
 - get_regex_from_prompt (prompt -> raw regex)
 - process_regex (raw regex -> usable regex)
 overall: +ve and -ve examples -> usable regex, as desired.
-note: does not include testing."""
+note: does not include testing.
+"""
 
-import os
-from groq import Groq
-import logging
-from datetime import datetime
-import re
 import json
+import logging
+import re
 
 from config import GROQ_API_KEY
+from groq import Groq
 
 logging.basicConfig(
         filename='my.log',
@@ -22,8 +21,7 @@ logging.basicConfig(
     )
 
 def load_prompt(file_path):
-    """
-    Reads a multi-line prompt from a specified text file.
+    """Reads a multi-line prompt from a specified text file.
 
     Args:
         file_path (str): Path to the text file containing the prompt.
@@ -43,7 +41,7 @@ def load_prompt(file_path):
         return None
 
 def clean_ex(ex : str):
-    """cleans the example strings of escape characters and similar"""
+    """Cleans the example strings of escape characters and similar"""
     bad_chars = ['\n', '<', '>', '\t', '\r', '/', '\\', ':', '*', '?', '"', '|']
 
     for c in bad_chars:
@@ -52,7 +50,7 @@ def clean_ex(ex : str):
     return ex
 
 def make_prompt(negative_examples, file_path = 'example.json'):
-    """makes the prompt out of the positive examples in the given file and any negative examples"""
+    """Makes the prompt out of the positive examples in the given file and any negative examples"""
     empty_prompt = load_prompt('empty_prompt.txt')
 
     with open(file_path, "r") as file:

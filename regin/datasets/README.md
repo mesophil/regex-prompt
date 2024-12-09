@@ -5,9 +5,9 @@ This script generates a dataset of feature activations from a language model usi
 ## Usage
 
 ```bash
-python -m feature_datasets.generate_dataset
+python -m regin.datasets.generate
 ```
 
 ```bash
-python -m feature_datasets.piviot_dataset feature_activations.jsonl features.jsonl --activation_threshold 10
+python -m regin.datasets.pivot data/gpt-2-small/train.jsonl data/gpt-2-small/examples/train.jsonl --act_thresh 10
 ```

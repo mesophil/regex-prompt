@@ -1,8 +1,8 @@
 import re
 
+
 def convert_to_safe_regex(input_string):
-    """
-    Convert a string to a safe, usable regex pattern
+    """Convert a string to a safe, usable regex pattern
     
     Args:
         input_string (str): Input string containing a regex-like pattern
