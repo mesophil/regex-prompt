@@ -1,6 +1,8 @@
-from typing import List
+from pathlib import Path
+from typing import List, Type, TypeVar
 
 from pydantic import BaseModel, NonNegativeInt
+
 
 class TokenizedString(BaseModel):
     text: str
@@ -62,3 +64,18 @@ class FeatureString(TokenizedString):
         assert len(self.active_features) == len(self.activations)
         assert len(self.active_features) == len(self.tokens)
 
+T = TypeVar('T', bound=BaseModel)
+
+def save_jsonl(file_path: Path, items: List[T]) -> None:
+    """Save a list of items to a JSONL file."""
+    with open(file_path, 'w') as f:
+        for item in items:
+            f.write(item.model_dump_json() + '\n')
+
+def load_jsonl(file_path: Path, model: Type[T]) -> List[T]:
+    """Load a list of items from a JSONL file."""
+    items = []
+    with open(file_path, 'r') as f:
+        for line in f:
+            items.append(model.model_validate_json(line))
+    return items

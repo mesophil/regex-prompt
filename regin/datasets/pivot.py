@@ -1,10 +1,10 @@
-"""This script transforms the data from the feature dataset to be indexed by feature instead of example.
-
-"""
+"""Convert feature dataset into examples of neuron activations."""
 from pathlib import Path
 from typing import Dict, List
+
 from tqdm import tqdm
-from .datatypes import TokenizedString, Examples, FeatureString
+
+from ..datatypes import Examples, FeatureString, TokenizedString, save_jsonl
 
 
 def read_feature_strings(file_path: Path) -> List[FeatureString]:
@@ -49,21 +49,19 @@ def pivot(dataset: List[FeatureString], prefix_length: int, activation_threshold
 
 def main(args):
     dataset = read_feature_strings(Path(args.feature_dataset))
-    pivoted = pivot(dataset, args.prefix_length, activation_threshold=args.activation_threshold)
-
-    with open(args.output_path, 'w') as f:
-        for feature_positive_examples in pivoted:
-            f.write(feature_positive_examples.model_dump_json() + '\n')
+    pivoted = pivot(dataset, args.prefix_length, activation_threshold=args.act_thresh)
+    args.save_path.parent.mkdir(parents=True, exist_ok=True)
+    save_jsonl(Path(args.save_path), pivoted)
 
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Pivot feature dataset')
-    parser.add_argument('feature_dataset', help='Path to feature dataset JSONL file')
-    parser.add_argument('output_path', help='Path to output JSONL file')
+    parser.add_argument('feature_dataset', help='Path to feature dataset JSONL file', type=Path)
+    parser.add_argument('save_path', help='Path to output JSONL file', type=Path)
     parser.add_argument('--prefix_length', type=int, default=20, help='Number of tokens to include in prefix')
-    parser.add_argument('--activation_threshold', type=float, default=0.0, help='Threshold for activation')
+    parser.add_argument('--act_thresh', type=float, default=0.0, help='Threshold for activation')
 
     args = parser.parse_args()
     main(args)

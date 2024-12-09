@@ -7,11 +7,11 @@ The script returns the precision and recall of the regex against the feature dat
 """
 
 import json
+import logging
 import re
-from typing import List, Dict
+from typing import Dict, List
 
 from tqdm import tqdm
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +24,14 @@ def load_dataset(dataset_path: str) -> List[Dict]:
             examples.append(json.loads(line))
     return examples
 
-def evaluate_regex(examples: List[Dict], feature_index: int, regex_pattern: str, activation_threshold: float = 0.0) -> tuple[float, float]:
-    """
-    Evaluate regex pattern against the dataset.
+
+def evaluate_regex(
+        examples: List[Dict],
+        feature_index: int,
+        regex_pattern: str,
+        activation_threshold: float = 0.0
+    ) -> tuple[float, float]:
+    """Evaluate regex pattern against the dataset.
     
     Returns:
         tuple[float, float]: (precision, recall)

@@ -1,6 +1,6 @@
 import json
-import re
 import logging
+import re
 
 from regex_pipe import test_regex
 
@@ -12,8 +12,7 @@ logging.basicConfig(
     )
 
 def process_activating_examples_single_feature(data) -> str:
-    """
-    Extract the most important token (final token) from each activating example and create a regex pattern.
+    """Extract the most important token (final token) from each activating example and create a regex pattern.
     """
     final_tokens = set()
     
