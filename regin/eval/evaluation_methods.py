@@ -7,21 +7,25 @@ The script returns the precision and recall of the regex against the feature dat
 """
 
 import logging
-import re
-from abc import ABC, abstractmethod
 from typing import Dict, List
 
 from tqdm import tqdm
 
+from regin.datatypes import FeatureString
+from regin.eval.matchers import Matcher
 
 logger = logging.getLogger(__name__)
 
-
+def calculate_metrics(true_positives: int, false_positives: int, false_negatives: int) -> tuple[float, float]:
+    """Calculate precision and recall from true positives, false positives and false negatives."""
+    precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
+    recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
+    return precision, recall
 
 def evaluate_token_level(
-        examples: List[Dict],
+        examples: List[FeatureString],
         feature_index: int,
-        evaluator: Matcher,
+        matcher: Matcher,
         activation_threshold: float = 0.0
     ) -> tuple[float, float]:
     """Evaluate regex pattern against the dataset at a token level.
@@ -37,14 +41,12 @@ def evaluate_token_level(
 
 
     for example in tqdm(examples):
-        text = example['text']
-        
         # Get positions where regex matches
-        regex_matches = evaluator.get_matching_tokens(text, example['offsets'])
+        regex_matches = matcher.get_matching_tokens(example.text, example.offsets)
 
         # Get positions where feature is active
         feature_matches = set()
-        for pos, (features, activations) in enumerate(zip(example['active_features'], example['activations'])):
+        for pos, (features, activations) in enumerate(zip(example.active_features, example.activations)):
             if feature_index in features:
                 index = features.index(feature_index)
                 if activations[index] > activation_threshold:
@@ -61,15 +63,13 @@ def evaluate_token_level(
     logger.info(f"Total regex matches: {total_regex_matches}")
     logger.info(f"Total feature matches: {total_feature_matches}")
 
-    precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
-    recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
-    
-    return precision, recall
+   
+    return calculate_metrics(true_positives, false_positives, false_negatives)
 
 def evaluate_sequence_level(
-    examples: List[Dict],
+    examples: List[FeatureString],
     feature_index: int,
-    evaluator: Matcher,
+    matcher: Matcher,
     activation_threshold: float = 0.0
 ):
     """Evaluate regex pattern against the dataset at a sequence level.
@@ -85,15 +85,13 @@ def evaluate_sequence_level(
 
 
     for example in tqdm(examples):
-        text = example['text']
-        
         # Check if regex matches anywhere in the string
-        regex_matches = evaluator.has_any_matching_tokens(text)
+        regex_matches = matcher.has_any_matching_tokens(example.text)
 
         # Get positions where feature is active
         feature_matches = any(
             activations[features.index(feature_index)] > activation_threshold
-            for features, activations in zip(example['active_features'], example['activations'])
+            for features, activations in zip(example.active_features, example.activations)
             if feature_index in features
         )
         
@@ -112,7 +110,4 @@ def evaluate_sequence_level(
     logger.info(f"Total regex matches: {total_regex_matches}")
     logger.info(f"Total feature matches: {total_feature_matches}")
 
-    precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
-    recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
-    
-    return precision, recall
+    return calculate_metrics(true_positives, false_positives, false_negatives)

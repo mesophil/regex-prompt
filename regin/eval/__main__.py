@@ -6,7 +6,7 @@ from regin.eval.evaluation_methods import evaluate_sequence_level, evaluate_toke
 from regin.eval.matchers import RegexMatcher
 
 
-def main():
+def main(args: argparse.Namespace) -> None:
     logging.basicConfig(level=logging.INFO)
     
     # Load dataset
@@ -16,10 +16,10 @@ def main():
 
     # Evaluate regex
     if args.sequence_level:
-        print("Evaluating at sequence level")
+        print(f"Evaluating at sequence level on {len(examples)} examples")
         precision, recall = evaluate_sequence_level(examples, args.feature_index, matcher, activation_threshold=args.activation_threshold)
     else:
-        print("Evaluating at token level")
+        print(f"Evaluating at token level on {len(examples)} examples")
         precision, recall = evaluate_token_level(examples, args.feature_index, matcher, activation_threshold=args.activation_threshold)
 
     f1 = (2*precision*recall)/(precision + recall) if precision > 0 and recall > 0 else 0
@@ -37,4 +37,4 @@ if __name__ == "__main__":
     parser.add_argument('--activation_threshold', type=float, default=0.0, help='Activation threshold')
 
     args = parser.parse_args()
-    main()
+    main(args)
