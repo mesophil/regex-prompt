@@ -72,6 +72,26 @@ def make_prompt(negative_examples, file_path = 'example.json'):
     logging.info(f"PROMPT: {prompt}")
     return prompt
 
+def make_prompt_preloaded(negative_examples, data):
+    """Makes the prompt out of the positive examples in the given file and any negative examples"""
+    empty_prompt = load_prompt('empty_prompt.txt')
+
+    full_prompt = [empty_prompt]
+    for ex in data['activating_examples']:
+        full_prompt.append(clean_ex(ex['text']))
+
+    if negative_examples:
+        full_prompt.append("\n The following list comprises the negative examples: ")
+
+        for n_ex in negative_examples:
+            full_prompt.append(clean_ex(n_ex))
+
+
+    prompt = ",".join(full_prompt)
+
+    logging.info(f"PROMPT: {prompt}")
+    return prompt
+
 def extract_regex(text):
     """Extracts the regex from the text, assuming the regex is enclosed by backticks"""
     match = re.search(r'`(.*?)`', text)
@@ -170,6 +190,12 @@ def run_pipe(negative_examples, file_path):
     regex = get_regex_from_prompt(prompt)
     processed_regex = process_regex(regex)
 
+    return processed_regex
+
+def run_pipe_preloaded(data):
+    prompt = make_prompt_preloaded([], data)
+    regex = get_regex_from_prompt(prompt)
+    processed_regex = process_regex(regex)
     return processed_regex
 
 def make_k(k, negative_examples, file_path):
