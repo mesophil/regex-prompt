@@ -47,5 +47,3 @@ class RegexMatcher(Matcher):
     def has_any_matching_tokens(self, text: str) -> bool:
         """Check if regex matches anywhere in the string."""
         return bool(self.pattern.search(text))
-
-
