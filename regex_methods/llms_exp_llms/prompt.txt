@@ -42,4 +42,4 @@ I'll see you later! Best wishes on your journey. Good night, sleep well. Until w
 
 Desired Output for Test Case 2: "False"
 
-Your answer must be only one sentence, with that sentence being the description. Wrap it around curly brackets
+Your answer must be only one sentence, with that sentence being the description. Make sure it is wrapped around curly brackets

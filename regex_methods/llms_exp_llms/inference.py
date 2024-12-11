@@ -15,6 +15,21 @@ logging.basicConfig(
 )
 
 
+def make_prompt_from_tokens(negative_examples, positive_examples):
+    empty_prompt = load_prompt('regex_methods/llms_exp_llms/empty_prompt.txt')
+    
+    full_prompt = [empty_prompt]
+    
+    positive_example_string = '\n'.join(positive_examples)
+    
+    negative_example_string = '\n'.join(negative_examples)
+    
+    full_prompt = '\n'.join([empty_prompt, "Positive Examples:", positive_example_string, "Negative Examples:", negative_example_string])
+    return full_prompt
+    
+    
+    
+
 
 def make_prompt(negative_examples, file_path='example.json'):
     """Makes the prompt out of the positive examples in the given file and any negative examples"""
@@ -94,7 +109,7 @@ def test_description(description, test_paragraph, system_prompt_path='regex_meth
     returned_text=""
     i = 0
     while not (returned_text == 'True' or returned_text =='False'):
-        chat_completion = client.chat.completion.create(
+        chat_completion = client.chat.completions.create(
             messages = [
                 {
                     'role': 'system',
@@ -104,7 +119,8 @@ def test_description(description, test_paragraph, system_prompt_path='regex_meth
                     'role': 'user',
                     'content': prompt
                 }
-            ]
+            ],
+            model=model
         )
         
         returned_text = chat_completion.choices[0].message.content
@@ -115,12 +131,17 @@ def test_description(description, test_paragraph, system_prompt_path='regex_meth
             returned_text='False'
             break 
     
-    estimated_value = 1 if returned_text == 'True' else 0
+    estimated_value = returned_text == 'True'
+    return estimated_value
      
     
-def run_pipe(negative_examples, file_path):
+def run_pipe(negative_examples, file_path, verbose=True):
     prompt = make_prompt(negative_examples, file_path)
+    if verbose:
+        print(prompt)
     description = get_description_from_prompt(prompt)
+    if verbose:
+        print(description)
     return description
 
 
@@ -133,17 +154,8 @@ if __name__ == '__main__':
     
     
     test_text = """
-    Android is one of the most popular operating systems in the world. Millions of devices run on Android,
-    from smartphones to tablets and even smart TVs. The Android ecosystem includes countless apps available 
-    on the Google Play Store, making Android incredibly versatile. Developers love Android because of its 
-    open-source nature and flexibility. Android updates, like Android 12 and Android 13, bring new features 
-    to enhance user experience.
-
-    If you're considering a new phone, you'll notice many brands offering Android devices, such as Samsung, 
-    Google Pixel, and OnePlus. Android’s customization options are unmatched, allowing users to personalize 
-    their Android experience. Whether you're a tech enthusiast or a casual user, Android has something for 
-    everyone. Have you explored the Android Auto feature for your car or the Android Wear OS for smartwatches? 
-    Android technology continues to evolve, making Android devices indispensable in daily life.
+    Hey, how are you doing today, there, how is your day going. It is good seeing you
     """
     
-    test_description(description, test_text)
+    prediction = test_description(description, test_text)
+    print(prediction)
