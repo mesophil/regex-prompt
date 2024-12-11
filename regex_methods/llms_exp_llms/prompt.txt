@@ -1,0 +1,45 @@
+Your task is to take a list of tokens that trigger an LLM feature to activate and a list of negative examples that fail to activate that same feature. 
+From that set of examples you must make a concise explanation of what the feature triggers on that can be passed as it's own prompt alongside a paragraph so that the LLM who gets this downstream prompt maximize recall and precision in it's predictions about whether the feature will activate on this new paragraph.
+
+
+Consider the following positive examples:
+"hello"
+"greetings"
+"salutations"
+"how are you doing?"
+"it's nice to meet you"
+"how do you do?"
+"good morning"
+"good evening"
+"good afternoon"
+"hello my good sir"
+
+And the following negative examples:
+"goodbye"
+"I'm leaving now"
+"good night"
+"best wishes"
+"see you later"
+
+
+Example Output: "Happy greetings"
+
+The desired results on the downstream tasks would be:
+
+
+Test Case 1:
+"""
+Hello! How are you doing today? I hope you're having a wonderful morning.
+"""
+
+
+Desired Output for Test Case 1: "True"
+
+Test Case 2
+"""
+I'll see you later! Best wishes on your journey. Good night, sleep well. Until we meet again.
+"""
+
+Desired Output for Test Case 2: "False"
+
+Your answer must be only one sentence, with that sentence being the description. Wrap it around curly brackets

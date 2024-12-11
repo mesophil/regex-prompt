@@ -1,0 +1,1 @@
+Given the string below and a description decide whether or not the string matches the description. Return your answer as "True" or "False" in one line wrapped around curly brackets:
