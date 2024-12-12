@@ -41,6 +41,7 @@ class RegexMatcher(Matcher):
                 if end <= offsets[i]:
                     token_pos = i - 1
                     break
+            token_pos = len(offsets) - 1
             matches.add(token_pos)
         return matches
 
