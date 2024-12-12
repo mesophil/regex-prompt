@@ -10,7 +10,7 @@ import json
 import logging
 import re
 
-from config import API_KEY
+from config import GROQ_API_KEY
 from groq import Groq
 
 logging.basicConfig(
@@ -103,7 +103,7 @@ def get_regex_from_prompt(prompt):
     """Generates the regex using the chosen LLM from the given prompt"""
     logging.info("------------------BEGIN GENERATION------------------")
     # client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-    client = Groq(api_key= API_KEY)
+    client = Groq(api_key=GROQ_API_KEY)
 
     chat_completion = client.chat.completions.create(
         messages=[
