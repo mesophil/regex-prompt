@@ -182,9 +182,9 @@ if __name__ == "__main__":
     parser.add_argument("--sae", type=str, default="gpt2-small-res-jb", help='SAE release')
     parser.add_argument("--sae_id", type=str, default="blocks.8.hook_resid_pre", help='SAE ID')
     parser.add_argument("--save_path", type=Path, default=Path("data", "gpt-2-small"), help='Path to save the dataset')
-    parser.add_argument('--train_size', type=int, default=1000, help='Size of training set')
-    parser.add_argument('--val_size', type=int, default=1000, help='Size of validation set')
-    parser.add_argument('--eval_size', type=int, default=8000, help='Size of evaluation set')
+    parser.add_argument('--train_size', type=int, default=10000, help='Size of training set')
+    parser.add_argument('--val_size', type=int, default=10000, help='Size of validation set')
+    parser.add_argument('--eval_size', type=int, default=10000, help='Size of evaluation set')
     parser.add_argument('--act_thresh', type=float, default=0.0, help='Activation threshold')
 
     args = parser.parse_args()
