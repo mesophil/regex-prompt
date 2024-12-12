@@ -34,14 +34,14 @@ class RegexMatcher(Matcher):
     def get_matching_tokens(self, text: str, offsets: list[int]) -> set[int]:
         """Get positions where regex matches."""
         matches = set()
+        offsets = offsets + [len(text)]
         for match in self.pattern.finditer(text):
             end = match.end()
             token_pos = None
-            for i in range(len(offsets)):
-                if end <= offsets[i]:
-                    token_pos = i - 1
+            for i in range(len(offsets) - 1):
+                if end <= offsets[i + 1]:
+                    token_pos = i
                     break
-            token_pos = len(offsets) - 1
             matches.add(token_pos)
         return matches
 
