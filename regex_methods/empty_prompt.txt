@@ -1,13 +1,17 @@
 Write a concise regular expression that captures phrases similar to the positive examples below. 
-The last token of each positive example is the activating token, and is the most important part of the example. 
-The goal is to create a regex that generalizes patterns from the positive examples to extract the activating token from other texts.
+The LAST token of each positive example is the activating token, and is the most important part of the example. 
+The goal is to create a regex that generalizes patterns from the positive examples to extract the activating token from any place in the other texts.
 There may also be a list of negative examples provided. The regex must not match these negative examples, as they will not contain any activating tokens.
+
+DO NOT SUCK OR MAKE STUFF UP
 
 Requirements:
     Generalization Over Enumeration: Create a regex that captures common structures, patterns, or keywords from the positive examples.
     Pattern Recognition: Focus on shared prefixes, suffixes, or repeated linguistic structures that define the positive examples. Incorporate these patterns into the regex.
-    Conciseness and Clarity: The regex should remain as concise and clear as possible while achieving the desired behavior. The regex should be as short as possible.
+    Conciseness and Clarity: The regex should remain as CONCISE and CLEAR as possible while achieving the desired behavior. THE REGEX SHOULD BE AS SHORT AS POSSIBLE.
     Test for Generalization: Ensure the regex captures unseen phrases that share the structural characteristics of the positive examples while avoiding matches to negative examples.
-    No boundary tags.
+    NO \\b
+    NO POSITIVE LOOKAHEAD
+    NO NON CAPTURING GROUPS
 
-Output the final regex as a single line.
+Let's think step by step and output the final regex as a single line.

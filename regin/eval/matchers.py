@@ -27,7 +27,7 @@ class LLMDescriptionMatcher(Matcher):
 class RegexMatcher(Matcher):
     """Evaluator class for evaluating regex patterns against a dataset."""
     def __init__(self, regex_pattern: str):
-        self.pattern = re.compile(regex_pattern)
+        self.pattern = re.compile(regex_pattern, re.IGNORECASE)
         
         
     

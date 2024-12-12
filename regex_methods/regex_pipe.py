@@ -80,7 +80,7 @@ def make_prompt(negative_examples, file_path = 'example.json'):
     logging.info(f"PROMPT: {prompt}")
     return prompt
 
-def make_prompt_preloaded(negative_examples, activating_examples, prev_regex, prev_f1):
+def make_prompt_preloaded(negative_examples, activating_examples, prev_regex, prev_precision, prev_recall, prev_f1):
     """Makes the prompt out of the positive examples in the given file and any negative examples"""
     empty_prompt = load_prompt('regex_methods/empty_prompt.txt')
 
@@ -88,19 +88,25 @@ def make_prompt_preloaded(negative_examples, activating_examples, prev_regex, pr
     np.random.shuffle(activating_examples)
 
     full_prompt.append("\n The following list comprises the positive examples:")
+    full_prompt.append("```text")
 
     for ex in activating_examples[:pos_ex_max]:
         if ex.text:
             full_prompt.append(clean_ex(ex.text))
 
+    full_prompt.append("```")
+
     if negative_examples:
+        
         full_prompt.append("\n The following list comprises the negative examples: ")
+        full_prompt.append("```text")
         for n_ex in negative_examples:
             if a := clean_ex(n_ex):
                 full_prompt.append(a)
+        full_prompt.append("```")
 
     if prev_regex:
-        full_prompt.append(f"\n This is the previous regex: {prev_regex}, which has an F1 score of: {prev_f1}")
+        full_prompt.append(f"\n This is the previous regex: {prev_regex}, which has a precision of: {prev_precision}, a recall of: {prev_recall}, and an F1 score of: {prev_f1}")
 
     prompt = "\n".join(full_prompt)
 
@@ -187,7 +193,7 @@ def get_regex_from_prompt(prompt):
 def process_regex(regex):
     if not regex: return regex
     """Prepares the regex for use in a match expression"""
-    regex = regex.replace('\x08', '\\b')
+    regex = regex.replace('\x08', '')
     regex = regex.replace('\n', '')
     regex = regex.replace(' ', '')
     regex = regex.replace('$', '')
@@ -217,8 +223,8 @@ def run_pipe(negative_examples, file_path):
 
     return processed_regex
 
-def run_pipe_preloaded(data, negative_examples=[], prev_regex = None, prev_f1 = 0):
-    prompt = make_prompt_preloaded(negative_examples, data, prev_regex, prev_f1)
+def run_pipe_preloaded(data, negative_examples=[], prev_regex = None, prev_precision=0, prev_recall=0, prev_f1 = 0):
+    prompt = make_prompt_preloaded(negative_examples, data, prev_regex, prev_precision, prev_recall, prev_f1)
     regex = get_regex_from_prompt(prompt)
     processed_regex = process_regex(regex)
     return processed_regex

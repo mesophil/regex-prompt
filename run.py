@@ -32,7 +32,7 @@ def run_proj():
     val_set_unpivoted = load_jsonl(val_unpivoted_path, FeatureString)
 
     # hyperparameter
-    activation_threshold = 10
+    activation_threshold = 1
     prefix_length = 20
     negative_ex_max = 10
 
@@ -42,19 +42,21 @@ def run_proj():
 
     false_pos = defaultdict(deque)
 
-    iterations = 5
-    for ex in train_set[:10]:
-        f1 = 0
+    iterations = 25
+    for ex in train_set[:1]:
+        f1 = seq_recall = seq_precision = 0
         for _ in range(iterations):
             feature_index = ex.feature_index
             regex = run_pipe_preloaded(data=ex.activating_examples, 
                                        negative_examples=false_pos[feature_index] if feature_index in false_pos else [],
                                        prev_regex=regexes[feature_index] if feature_index in regexes else None,
-                                       prev_f1 = f1)
+                                       prev_precision=seq_precision,
+                                       prev_recall=seq_recall,
+                                       prev_f1=f1)
             
             regexes[feature_index] = regex
             try:
-                re.compile(regex)
+                re.compile(regex, re.IGNORECASE)
             except:
                 regex = "(.*?)"
             
