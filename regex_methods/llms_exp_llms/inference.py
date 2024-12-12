@@ -2,9 +2,10 @@ from groq import Groq
 from argparse import Namespace
 from pathlib import Path 
 from typing import List 
-from config import API_KEY, QUERY_TIMEOUT
+from config import QUERY_TIMEOUT, MODEL_NAME
 import json 
 import logging
+from regex_methods.llms_exp_llms.interfacing import get_client
 from regex_methods.regex_pipe import load_prompt, clean_ex
 
 logging.basicConfig(
@@ -61,9 +62,9 @@ def clean_response(text):
         return text[start + 1:end]
     return None
 
-def get_description_from_prompt(prompt, system_prompt_path = "regex_methods/llms_exp_llms/prompt.txt", model='llama-3.3-70b-specdec'):
+def get_description_from_prompt(prompt, system_prompt_path = "regex_methods/llms_exp_llms/prompt.txt", model=MODEL_NAME, client = 'Lev'):
     logging.info("-------------------------BEGIN GENERATION-------------------------")
-    client = Groq(api_key=API_KEY)
+    client = get_client(client)
     
     
     system_prompt = open(system_prompt_path, 'r').read()
@@ -95,7 +96,7 @@ def get_description_from_prompt(prompt, system_prompt_path = "regex_methods/llms
 
 
 
-def test_description(description, test_paragraph, system_prompt_path='regex_methods/llms_exp_llms/eval_prompt.txt', model='llama-3.3-70b-specdec'):
+def test_description(description, test_paragraph, system_prompt_path='regex_methods/llms_exp_llms/eval_prompt.txt', model=MODEL_NAME, client='Lev'):
     
     logging.info("-------------------------TESTING LLMS EXPLAIN LLMS-------------------------")
     
@@ -105,7 +106,7 @@ def test_description(description, test_paragraph, system_prompt_path='regex_meth
     
     prompt = '\n'.join(prompt)
     
-    client = Groq(api_key = API_KEY)
+    client = get_client(client)
     returned_text=""
     i = 0
     while not (returned_text == 'True' or returned_text =='False'):
