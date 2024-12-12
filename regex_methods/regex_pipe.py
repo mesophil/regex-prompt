@@ -13,9 +13,12 @@ import re
 import os
 import openai
 
+import numpy as np
+
 from groq import Groq
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+pos_ex_max = 10
 
 logging.basicConfig(
         filename='my.log',
@@ -77,12 +80,16 @@ def make_prompt(negative_examples, file_path = 'example.json'):
     logging.info(f"PROMPT: {prompt}")
     return prompt
 
-def make_prompt_preloaded(negative_examples, activating_examples):
+def make_prompt_preloaded(negative_examples, activating_examples, prev_regex, prev_f1):
     """Makes the prompt out of the positive examples in the given file and any negative examples"""
     empty_prompt = load_prompt('regex_methods/empty_prompt.txt')
 
     full_prompt = [empty_prompt]
-    for ex in activating_examples:
+    np.random.shuffle(activating_examples)
+
+    full_prompt.append("\n The following list comprises the positive examples:")
+
+    for ex in activating_examples[:pos_ex_max]:
         if ex.text:
             full_prompt.append(clean_ex(ex.text))
 
@@ -91,6 +98,9 @@ def make_prompt_preloaded(negative_examples, activating_examples):
         for n_ex in negative_examples:
             if a := clean_ex(n_ex):
                 full_prompt.append(a)
+
+    if prev_regex:
+        full_prompt.append(f"\n This is the previous regex: {prev_regex}, which has an F1 score of: {prev_f1}")
 
     prompt = "\n".join(full_prompt)
 
@@ -180,6 +190,7 @@ def process_regex(regex):
     regex = regex.replace('\x08', '\\b')
     regex = regex.replace('\n', '')
     regex = regex.replace(' ', '')
+    regex = regex.replace('$', '')
     #regex = re.escape(regex)
     return regex
 
@@ -206,18 +217,11 @@ def run_pipe(negative_examples, file_path):
 
     return processed_regex
 
-def run_pipe_preloaded(data, negative_examples=[]):
-    prompt = make_prompt_preloaded(negative_examples, data)
+def run_pipe_preloaded(data, negative_examples=[], prev_regex = None, prev_f1 = 0):
+    prompt = make_prompt_preloaded(negative_examples, data, prev_regex, prev_f1)
     regex = get_regex_from_prompt(prompt)
     processed_regex = process_regex(regex)
     return processed_regex
-
-def make_k(k, negative_examples, file_path):
-    """Make k calls to the end pipeline (ideally after all the negative generation has been done)"""
-    prompt = make_prompt(negative_examples, file_path)
-    regexes = [process_regex(get_regex_from_prompt(prompt)) for _ in range(k)]
-
-    return regexes
 
 
 if __name__ == "__main__":
