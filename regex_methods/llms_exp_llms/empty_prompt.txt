@@ -10,6 +10,6 @@ Requirements:
     Test for Generalization: Ensure the description captures unseen phrases that share the structural characteristics of the positive examples while avoiding matches to negative examples.
     Do not use non capturing groups.
 
-Output the final description as a single line, and explain how it captures the desired behavior and generalizes to unseen phrases.
+Output the final description as a single line wrapped around curly brackets.
 
 The following list comprises the positive examples:
