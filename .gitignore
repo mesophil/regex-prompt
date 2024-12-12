@@ -168,3 +168,6 @@ cython_debug/
 config.py
 
 data/gpt-2-small/examples/*
+
+*.csv
+partial_output.txt

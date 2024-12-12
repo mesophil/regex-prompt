@@ -2,7 +2,9 @@ from groq import Groq
 from argparse import Namespace
 from pathlib import Path 
 from typing import List 
-from config import API_KEY, QUERY_TIMEOUT
+#from config import API_KEY, QUERY_TIMEOUT
+API_KEY = 7
+QUERY_TIMEOUT = 10
 import json 
 import logging
 from regex_methods.regex_pipe import load_prompt, clean_ex
