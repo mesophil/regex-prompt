@@ -38,7 +38,7 @@ def run_proj():
     f1_scores = []
     np.random.shuffle(train_set)
 
-    false_pos = defaultdict(list)
+    false_pos = defaultdict(deque)
 
     iterations = 5
     for _ in range(iterations):

@@ -45,6 +45,7 @@ def load_prompt(file_path):
         return None
 
 def clean_ex(ex : str):
+    if not ex: return ex
     """Cleans the example strings of escape characters and similar"""
     bad_chars = ['\n', '<|endoftext|>', '<', '>', '\t', '\r', '/', '\\', ':', '*', '?', '"', '|']
 
@@ -174,6 +175,7 @@ def get_regex_from_prompt(prompt):
     return final_regex_str
 
 def process_regex(regex):
+    if not regex: return regex
     """Prepares the regex for use in a match expression"""
     regex = regex.replace('\x08', '\\b')
     regex = regex.replace('\n', '')
