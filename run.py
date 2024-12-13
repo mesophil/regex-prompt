@@ -8,6 +8,8 @@ import numpy as np
 import logging
 import re
 
+from regex_methods.simple_or import simple_or_regex
+
 from collections import defaultdict, deque
 
 from typing import List
@@ -42,17 +44,18 @@ def run_proj():
 
     false_pos = defaultdict(deque)
 
-    iterations = 25
-    for ex in train_set[:1]:
+    iterations = 1
+    for ex in train_set[:50]:
         f1 = seq_recall = seq_precision = 0
         for _ in range(iterations):
             feature_index = ex.feature_index
-            regex = run_pipe_preloaded(data=ex.activating_examples, 
-                                       negative_examples=false_pos[feature_index] if feature_index in false_pos else [],
-                                       prev_regex=regexes[feature_index] if feature_index in regexes else None,
-                                       prev_precision=seq_precision,
-                                       prev_recall=seq_recall,
-                                       prev_f1=f1)
+            # regex = run_pipe_preloaded(data=ex.activating_examples, 
+            #                            negative_examples=false_pos[feature_index] if feature_index in false_pos else [],
+            #                            prev_regex=regexes[feature_index] if feature_index in regexes else None,
+            #                            prev_precision=seq_precision,
+            #                            prev_recall=seq_recall,
+            #                            prev_f1=f1)
+            regex = simple_or_regex(data=ex)
             
             regexes[feature_index] = regex
             try:

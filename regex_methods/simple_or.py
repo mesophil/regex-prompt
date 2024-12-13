@@ -2,7 +2,7 @@ import json
 import logging
 import re
 
-from regex_pipe import test_regex
+from regin.datatypes import Examples
 
 logging.basicConfig(
         filename='my.log',
@@ -11,19 +11,16 @@ logging.basicConfig(
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-def process_activating_examples_single_feature(data) -> str:
+def simple_or_regex(data : Examples) -> str:
     """Extract the most important token (final token) from each activating example and create a regex pattern.
     """
     final_tokens = set()
     
-    for ex in data["activating_examples"]:
-        final_tokens.add(ex['text'][ex['offsets'][-1]:])
+    for ex in data.activating_examples:
+        final_tokens.add(ex.text[ex.offsets[-1]:])
 
-    token_patterns = [re.escape(str(token)) for token in final_tokens]
+    token_patterns = [str(token) for token in final_tokens]
     regex_pattern = f"({'|'.join(token_patterns)})"
-
-    logging.info(f"Final Tokens: {final_tokens}")
-    logging.info(f"Selection Regex: {regex_pattern}")
     
     return regex_pattern
 
@@ -33,7 +30,7 @@ if __name__ == "__main__":
     with open(file_path, "r") as file:
         data = json.load(file)
 
-    regex_pattern = process_activating_examples_single_feature(data)
+    regex_pattern = simple_or_regex(data)
 
     test_text = """
     Android is one of the most popular operating systems in the world. Millions of devices run on Android,
@@ -48,5 +45,3 @@ if __name__ == "__main__":
     everyone. Have you explored the Android Auto feature for your car or the Android Wear OS for smartwatches? 
     Android technology continues to evolve, making Android devices indispensable in daily life.
     """
-
-    res = test_regex(regex_pattern, test_text=test_text)
