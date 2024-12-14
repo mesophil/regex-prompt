@@ -1,15 +1,6 @@
 # Regex Prompt
-## Git LFS Installation
-### macOS (using Homebrew)
+## Load the datasets using rsync
+
+```bash
+rsync -azvhP ml-cluster:scratch/data/saes/gpt-2-small data
 ```
-brew install git-lfs
-```
-### Ubuntu/Debian
-```
-sudo apt install git-lfs
-```
-Followed by 
-```
-git lfs install
-```
-Then clone the repository.

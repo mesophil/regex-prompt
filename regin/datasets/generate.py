@@ -11,9 +11,7 @@ from transformer_lens import HookedTransformer
 from transformer_lens.utils import tokenize_and_concatenate
 from transformers import AutoTokenizer
 
-from regin.datatypes import save_jsonl
-
-from ..datatypes import FeatureString
+from regin.datatypes import save_jsonl, FeatureString
 
 
 def get_tokens_and_offsets(text: str, tokenizer: AutoTokenizer) \
@@ -141,7 +139,7 @@ def create_feature_dataset(
 
 def main(args: Namespace):
    # Initialize model and SAE as in your original script
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "mps"
     model = HookedTransformer.from_pretrained(args.model, device=device) # default "gpt2-small"
 
     sae, cfg_dict, sparsity = SAE.from_pretrained(
