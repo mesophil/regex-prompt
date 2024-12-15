@@ -14,11 +14,10 @@ from collections import defaultdict, deque
 
 from typing import List
 
+from config import activation_threshold
+
 train_path = "data/gpt-2-small/examples/train.jsonl"
-eval_path = "data/gpt-2-small/examples/eval.jsonl"
-val_path = "data/gpt-2-small/examples/val.jsonl"
-eval_unpivoted_path = "data/gpt-2-small/eval.jsonl"
-val_unpivoted_path = "data/gpt-2-small/val.jsonl"
+val_unpivoted_path = "data/gpt-2-small/val_5000.jsonl"
 
 logging.basicConfig(
         filename='my.log',
@@ -27,14 +26,14 @@ logging.basicConfig(
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
+np.random.seed(123)
+
 def run_proj():
     logging.info("-----------BEGIN----------")
     train_set = load_jsonl(train_path, Examples)
-    eval_set_unpivoted = load_jsonl(eval_unpivoted_path, FeatureString)
     val_set_unpivoted = load_jsonl(val_unpivoted_path, FeatureString)
 
     # hyperparameter
-    activation_threshold = 1
     prefix_length = 20
     negative_ex_max = 10
 
@@ -44,18 +43,18 @@ def run_proj():
 
     false_pos = defaultdict(deque)
 
-    iterations = 1
-    for ex in train_set[:50]:
+    iterations = 5
+    for ex in train_set[:20]:
         f1 = seq_recall = seq_precision = 0
         for _ in range(iterations):
             feature_index = ex.feature_index
-            # regex = run_pipe_preloaded(data=ex.activating_examples, 
-            #                            negative_examples=false_pos[feature_index] if feature_index in false_pos else [],
-            #                            prev_regex=regexes[feature_index] if feature_index in regexes else None,
-            #                            prev_precision=seq_precision,
-            #                            prev_recall=seq_recall,
-            #                            prev_f1=f1)
-            regex = simple_or_regex(data=ex)
+            regex = run_pipe_multi(data=ex.activating_examples, 
+                                       negative_examples=false_pos[feature_index] if feature_index in false_pos else [],
+                                       prev_regex=regexes[feature_index] if feature_index in regexes else None,
+                                       prev_precision=seq_precision,
+                                       prev_recall=seq_recall,
+                                       prev_f1=f1)
+            # regex = simple_or_regex(data=ex)
             
             regexes[feature_index] = regex
             try:
@@ -72,7 +71,7 @@ def run_proj():
             f1 = (2*seq_precision*seq_recall)/(seq_precision + seq_recall) if seq_precision > 0 and seq_recall > 0 else 0
             f1_scores.append((feature_index, seq_precision, seq_recall, f1, regex))
 
-            with open("partial_output.txt", "a") as file:\
+            with open("results/partial_output.txt", "a") as file:\
                 file.write(f"Feature {feature_index}: Prec {seq_precision:.3f}, Rec {seq_recall:.3f}, F1 {f1:.3f}. Regex: {regex}\n")
             
             false_pos_samp, false_neg_samp = get_mistakes_token_level(dataset=val_set_unpivoted, 
@@ -92,7 +91,7 @@ def run_proj():
     
     df = pd.DataFrame(f1_scores, columns=["Feature Index", "Precision", "Recall", "F1 Score", "Regex"])
 
-    df.to_csv('f1_scores.csv', index=False)
+    df.to_csv('results/f1_scores.csv', index=False)
 
     logging.info("-----------END----------")
 
