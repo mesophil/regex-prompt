@@ -10,8 +10,15 @@ import json
 import logging
 import re
 
-from config import GROQ_API_KEY
+import os
+import openai
+
+import numpy as np
+
 from groq import Groq
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+pos_ex_max = 10
 
 logging.basicConfig(
         filename='my.log',
@@ -41,8 +48,9 @@ def load_prompt(file_path):
         return None
 
 def clean_ex(ex : str):
+    if not ex: return ex
     """Cleans the example strings of escape characters and similar"""
-    bad_chars = ['\n', '<', '>', '\t', '\r', '/', '\\', ':', '*', '?', '"', '|']
+    bad_chars = ['\n', '<|endoftext|>', '<', '>', '\t', '\r', '/', '\\', ':', '*', '?', '"', '|']
 
     for c in bad_chars:
         ex = ex.replace(c, '')
@@ -72,22 +80,29 @@ def make_prompt(negative_examples, file_path = 'example.json'):
     logging.info(f"PROMPT: {prompt}")
     return prompt
 
-def make_prompt_preloaded(negative_examples, data):
+def make_prompt_preloaded(negative_examples, activating_examples, prev_regex, prev_f1):
     """Makes the prompt out of the positive examples in the given file and any negative examples"""
-    empty_prompt = load_prompt('empty_prompt.txt')
+    empty_prompt = load_prompt('regex_methods/empty_prompt.txt')
 
     full_prompt = [empty_prompt]
-    for ex in data['activating_examples']:
-        full_prompt.append(clean_ex(ex['text']))
+    np.random.shuffle(activating_examples)
+
+    full_prompt.append("\n The following list comprises the positive examples:")
+
+    for ex in activating_examples[:pos_ex_max]:
+        if ex.text:
+            full_prompt.append(clean_ex(ex.text))
 
     if negative_examples:
         full_prompt.append("\n The following list comprises the negative examples: ")
-
         for n_ex in negative_examples:
-            full_prompt.append(clean_ex(n_ex))
+            if a := clean_ex(n_ex):
+                full_prompt.append(a)
 
+    if prev_regex:
+        full_prompt.append(f"\n This is the previous regex: {prev_regex}, which has an F1 score of: {prev_f1}")
 
-    prompt = ",".join(full_prompt)
+    prompt = "\n".join(full_prompt)
 
     logging.info(f"PROMPT: {prompt}")
     return prompt
@@ -103,7 +118,12 @@ def get_regex_from_prompt(prompt):
     """Generates the regex using the chosen LLM from the given prompt"""
     logging.info("------------------BEGIN GENERATION------------------")
     # client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-    client = Groq(api_key=GROQ_API_KEY)
+    # client = Groq(api_key=GROQ_API_KEY)
+
+    client = openai.OpenAI(
+                base_url="http://localhost:8000/v1",
+                api_key='token-abc123'
+            )
 
     chat_completion = client.chat.completions.create(
         messages=[
@@ -115,7 +135,8 @@ def get_regex_from_prompt(prompt):
                 "content": prompt,
             }
         ],
-        model="llama-3.3-70b-specdec",
+        model="Qwen/Qwen2.5-Coder-32B-Instruct",
+        max_tokens=1024,
     )
 
     chat_completion_str = chat_completion.choices[0].message.content
@@ -132,7 +153,8 @@ def get_regex_from_prompt(prompt):
                 "content": "extract the final regex from this statement, and output it alone as a single plaintext line with no other content: " + chat_completion_str,
             }
         ],
-        model="llama-3.3-70b-specdec",
+        model="Qwen/Qwen2.5-Coder-32B-Instruct",
+        max_tokens=1024,
     )
 
     regex_str = regex.choices[0].message.content
@@ -146,7 +168,8 @@ def get_regex_from_prompt(prompt):
                 "content": "fix this regex string and output it alone as a single plaintext line, ensuring it is enclosed with one pair of backticks `: " + regex_str,
             }
         ],
-        model="llama-3.3-70b-specdec",
+        model="Qwen/Qwen2.5-Coder-32B-Instruct",
+        max_tokens=1024,
     )
 
     final_regex_str = final_regex.choices[0].message.content
@@ -162,10 +185,12 @@ def get_regex_from_prompt(prompt):
     return final_regex_str
 
 def process_regex(regex):
+    if not regex: return regex
     """Prepares the regex for use in a match expression"""
     regex = regex.replace('\x08', '\\b')
     regex = regex.replace('\n', '')
     regex = regex.replace(' ', '')
+    regex = regex.replace('$', '')
     #regex = re.escape(regex)
     return regex
 
@@ -192,18 +217,11 @@ def run_pipe(negative_examples, file_path):
 
     return processed_regex
 
-def run_pipe_preloaded(data):
-    prompt = make_prompt_preloaded([], data)
+def run_pipe_preloaded(data, negative_examples=[], prev_regex = None, prev_f1 = 0):
+    prompt = make_prompt_preloaded(negative_examples, data, prev_regex, prev_f1)
     regex = get_regex_from_prompt(prompt)
     processed_regex = process_regex(regex)
     return processed_regex
-
-def make_k(k, negative_examples, file_path):
-    """Make k calls to the end pipeline (ideally after all the negative generation has been done)"""
-    prompt = make_prompt(negative_examples, file_path)
-    regexes = [process_regex(get_regex_from_prompt(prompt)) for _ in range(k)]
-
-    return regexes
 
 
 if __name__ == "__main__":

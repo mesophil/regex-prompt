@@ -6,6 +6,7 @@ import time
 import pandas as pd
 import numpy as np
 import logging
+import re
 
 from collections import defaultdict, deque
 
@@ -33,6 +34,7 @@ def run_proj():
     # hyperparameter
     activation_threshold = 10
     prefix_length = 20
+    negative_ex_max = 10
 
     regexes = {} # (feature_index, regex)
     f1_scores = []
@@ -41,13 +43,20 @@ def run_proj():
     false_pos = defaultdict(deque)
 
     iterations = 5
-    for _ in range(iterations):
-        for ex in train_set[:10]:
+    for ex in train_set[:10]:
+        f1 = 0
+        for _ in range(iterations):
             feature_index = ex.feature_index
             regex = run_pipe_preloaded(data=ex.activating_examples, 
-                                       negative_examples=false_pos[feature_index] if feature_index in false_pos else [])
+                                       negative_examples=false_pos[feature_index] if feature_index in false_pos else [],
+                                       prev_regex=regexes[feature_index] if feature_index in regexes else None,
+                                       prev_f1 = f1)
             
             regexes[feature_index] = regex
+            try:
+                re.compile(regex)
+            except:
+                regex = "(.*?)"
             
             matcher = RegexMatcher(regex)
             seq_precision, seq_recall = evaluate_sequence_level(dataset=val_set_unpivoted, 
@@ -62,17 +71,18 @@ def run_proj():
                 file.write(f"Feature {feature_index}: Prec {seq_precision:.3f}, Rec {seq_recall:.3f}, F1 {f1:.3f}. Regex: {regex}\n")
             
             false_pos_samp, false_neg_samp = get_mistakes_token_level(dataset=val_set_unpivoted, 
-                                                            feature_index=feature_index, 
-                                                            matcher=matcher, 
-                                                            prefix_length=prefix_length, 
-                                                            activation_threshold=activation_threshold)
+                                                                        feature_index=feature_index, 
+                                                                        matcher=matcher, 
+                                                                        prefix_length=prefix_length, 
+                                                                        activation_threshold=activation_threshold)
             
             logging.info(f"False positives: {false_pos_samp}")
 
             if false_pos_samp:
-                for ex in false_pos_samp.activating_examples:
-                    false_pos[feature_index].append(ex.text)
-                    if len(false_pos[feature_index]) > 20:
+                np.random.shuffle(false_pos_samp.activating_examples)
+                for neg_ex in false_pos_samp.activating_examples[:negative_ex_max]:
+                    false_pos[feature_index].append(neg_ex.text)
+                    if len(false_pos[feature_index]) > negative_ex_max:
                         false_pos[feature_index].popleft()
     
     df = pd.DataFrame(f1_scores, columns=["Feature Index", "Precision", "Recall", "F1 Score", "Regex"])
