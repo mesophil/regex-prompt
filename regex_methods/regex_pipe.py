@@ -57,7 +57,7 @@ def clean_ex(ex : str):
 
     return ex
 
-def make_prompt(negative_examples, file_path = 'example.json'):
+def make_prompt_single(negative_examples, file_path = 'example.json'):
     """Makes the prompt out of the positive examples in the given file and any negative examples"""
     empty_prompt = load_prompt('empty_prompt.txt')
 
@@ -80,7 +80,7 @@ def make_prompt(negative_examples, file_path = 'example.json'):
     logging.info(f"PROMPT: {prompt}")
     return prompt
 
-def make_prompt_preloaded(negative_examples, activating_examples, prev_regex, prev_precision, prev_recall, prev_f1):
+def make_prompt_multi(negative_examples, activating_examples, prev_regex, prev_precision, prev_recall, prev_f1):
     """Makes the prompt out of the positive examples in the given file and any negative examples"""
     empty_prompt = load_prompt('regex_methods/empty_prompt.txt')
 
@@ -215,16 +215,16 @@ def test_regex(regex, test_text):
 
     return matches
 
-def run_pipe(negative_examples, file_path):
+def run_pipe_single(negative_examples, file_path):
     """Run the full pipeline to make a regex from +'ve and -'ve examples"""
-    prompt = make_prompt(negative_examples, file_path)
+    prompt = make_prompt_single(negative_examples, file_path)
     regex = get_regex_from_prompt(prompt)
     processed_regex = process_regex(regex)
 
     return processed_regex
 
-def run_pipe_preloaded(data, negative_examples=[], prev_regex = None, prev_precision=0, prev_recall=0, prev_f1 = 0):
-    prompt = make_prompt_preloaded(negative_examples, data, prev_regex, prev_precision, prev_recall, prev_f1)
+def run_pipe_multi(data, negative_examples=[], prev_regex = None, prev_precision=0, prev_recall=0, prev_f1 = 0):
+    prompt = make_prompt_multi(negative_examples, data, prev_regex, prev_precision, prev_recall, prev_f1)
     regex = get_regex_from_prompt(prompt)
     processed_regex = process_regex(regex)
     return processed_regex
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 
     # test_regex(regex=regex, test_text=test_text)   
 
-    regex = run_pipe([], file_path='example.json')
+    regex = run_pipe_single([], file_path='example.json')
 
     logging.info(f"PROCESSED REGEX: {regex}")
 

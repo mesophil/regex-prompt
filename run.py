@@ -1,5 +1,5 @@
 from regin.datatypes import load_jsonl, Examples, FeatureString
-from regex_methods.regex_pipe import run_pipe_preloaded
+from regex_methods.regex_pipe import run_pipe_multi
 from regin.eval.evaluation_methods import evaluate_sequence_level, evaluate_token_level, get_mistakes_token_level
 from regin.eval.matchers import RegexMatcher
 import time
